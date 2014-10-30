@@ -7,3 +7,6 @@
 	margin-left: auto;
 	margin-right: auto;
 }
+#transmogrify-subtitle-alert {
+	z-index: 9999;
+}

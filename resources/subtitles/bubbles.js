@@ -258,12 +258,18 @@ function videoBubbles() {
 				var subsObj = bubbles.subs[ obj ],
 					lang = subsObj.lang;
 					
-					if( !subsObj[ lang ] ) return 0; //not loaded yet
+				if( !subsObj[ lang ] ) return 0; //not loaded yet
+
+				var selector = doc.getElementById( obj );
+
+				if (!doc.getElementById( obj )) { // video element no longer exists
+					return false;
+				}
 					
 				var subLen = subsObj[ lang ].length,
 					elem = subsObj.subCont,
 					recordedTime = subsObj[ lang ].curTime,
-					currentTime = doc.getElementById( obj ).currentTime + subsObj.syncNumber,
+					currentTime = selector.currentTime + subsObj.syncNumber,
 					i;
 					
 				if( currentTime === recordedTime )

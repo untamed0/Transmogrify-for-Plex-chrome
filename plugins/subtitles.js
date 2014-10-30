@@ -98,8 +98,6 @@ subtitles = {
 	},
 
 	play: function(subs, lang) {
-		if (subtitles.jsInsert)
-			return;
 /*
 	For future use when browsers add support for subtitles
 
@@ -111,14 +109,24 @@ subtitles = {
 		document.getElementById("html-video").appendChild(track);
 */
 		// insert bubblesjs
+		if (!subtitles.jsInsert) {
+			var bubblesScript = document.createElement("script");
+			bubblesScript.src = chrome.extension.getURL("resources/subtitles/bubbles.js");
+			document.head.appendChild(bubblesScript);
 
-		var bubblesScript = document.createElement("script");
-		bubblesScript.src = chrome.extension.getURL("resources/subtitles/bubbles.js");
-		document.head.appendChild(bubblesScript);
+			subtitles.jsInsert = true;
+		}
+
+		// make sure old code is removed
+		var selector = document.getElementById("transmogrify-script");
+		if (selector) {
+			selector.parentNode.removeChild(selector);
+		}
 
 		// have to use setTimeout to allow bubblesjs to execute
 		setTimeout(function() {
 			var s2 = document.createElement('script');
+			s2.setAttribute("id", "transmogrify-script");
 			s2.textContent = 'function transmogrifySubChange(lang){ if (!lang) { TransmogrifySubs.subsShow(false); } else { TransmogrifySubs.subsShow(true); TransmogrifySubs.langChange(lang); } } var TransmogrifySubs = new Bubbles.video("html-video", false, null, true);TransmogrifySubs.subtitles(false, ' + JSON.stringify(subs) + '); ';
 
 			if (!lang) {
@@ -130,7 +138,6 @@ subtitles = {
 			document.head.appendChild(s2);
 		}, 500);
 
-		subtitles.jsInsert = true;
 		subtitles.hotkeysInit();
 	},
 

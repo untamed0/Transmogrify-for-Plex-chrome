@@ -347,6 +347,10 @@ utils = {
                 utils.storage_set("stats_link", "on");
             }
 
+            if (!("subtitles" in settings)) {
+                utils.storage_set("subtitles", "on");
+            }
+
             if (!("last_version" in settings)) {
                 utils.storage_set("last_version", "");
             }

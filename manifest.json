@@ -8,7 +8,7 @@
   "content_scripts": [
     {
       "matches": ["*://*/web*"],
-      "css": ["css/transmogrify.css"],
+      "css": ["css/transmogrify.css", "css/subtitles.css"],
       "js": [
         "utils.js",
         "apis/omdb.js",
@@ -24,6 +24,7 @@
         "plugins/rotten_tomatoes.js",
         "plugins/split_added_deck.js",
         "plugins/stats.js",
+        "plugins/subtitles.js",
         "plugins/trakt.js",
         "plugins/tvdb.js",
         "plugins/youtube_trailer.js",

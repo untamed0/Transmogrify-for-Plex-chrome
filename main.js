@@ -435,6 +435,15 @@ function main() {
                     // we're on a movie page
                     utils.debug("main detected we are on a movie page");
 
+                    // subtitles
+                    if (settings["subtitles"] === "on") {
+                        utils.debug("subtitles plugin is enabled");
+                        subtitles.init(metadata_xml);
+                    }
+                    else {
+                        utils.debug("subtitles plugin is disabled");
+                    }
+
                     // insert canistreamit widget
                     if (settings["canistreamit"] === "on") {
                         utils.debug("canistreamit plugin is enabled");

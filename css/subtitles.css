@@ -9,4 +9,9 @@
 }
 #transmogrify-subtitle-alert {
 	z-index: 9999;
+	right: -6%;
+	left: auto;
+	top: auto;
+	bottom: 10%;
+	width: 300px;
 }

@@ -107,7 +107,7 @@ subtitles = {
 		track.setAttribute("default", "");
 		document.getElementById("html-video").appendChild(track);
 */
-		// insert bubblejs
+		// insert bubblesjs
 		var bubblesScript = document.createElement("script");
 		bubblesScript.src = chrome.extension.getURL("resources/subtitles/bubbles.js");
 		document.head.appendChild(bubblesScript);
@@ -137,42 +137,54 @@ subtitles = {
 			} else if (e.which == 72) { // h
 				utils.debug("subtitles plugin: H hotkey pressed, increasing subtitle timing");
 				subtitles.hotkeys('add');
+			} else if (e.which == 86) { // v
+				utils.debug("subtitles plugin: V hotkey pressed, toggling subtitles");
+				subtitles.hotkeys('toggle');
 			}
 		}
 	},
 
 	hotkeys: function(act) {
-		if (act == "add"){
-			subtitles.sync++;
+		var ss = document.createElement('script');
+
+		if (act == 'toggle') {
+			subtitles.alert('Toggling subtitles');
+			ss.textContent = 'TransmogrifySubs.subsToggle()';
 		} else {
-			subtitles.sync--;
+			if (act == "add") {
+				subtitles.sync++;
+			} else if (act == 'subtract') {
+				subtitles.sync--;
+			}
+
+			var sec = 0.05 * subtitles.sync;
+			ss.textContent = 'TransmogrifySubs.subsSync(' + sec + ')';
+			subtitles.alert('Subtitle delay ' + Math.round(sec * 1000) + 'ms');
 		}
 
-		var sec = 0.05 * subtitles.sync;
-		var ms = Math.round(sec * 1000);
+		document.head.appendChild(ss);
+		ss.parentNode.removeChild(ss);
+	},
+
+	alert: function(text) {
 		var selector = document.getElementById("transmogrify-subtitle-alert");
 
 		if (selector) {
 			clearTimeout(subtitles.hideAlert);
 			selector.style.display = 'none';
 			selector.setAttribute("class", "alert alert-status");
-			selector.getElementsByClassName('status')[0].innerText = 'Subtitle delay ' + ms + 'ms';
+			selector.getElementsByClassName('status')[0].innerText = text;
 			selector.style.display = 'block';
 		} else {
 			var alert = document.createElement("div");
 			alert.setAttribute("id", "transmogrify-subtitle-alert");
 			alert.setAttribute("class", "alert alert-status");
-			alert.innerHTML = '<i class="alert-icon glyphicon stopwatch"></i><span class="status">Subtitle delay ' + ms + 'ms</span>';
+			alert.innerHTML = '<i class="alert-icon glyphicon stopwatch"></i><span class="status">' + text + '</span>';
 			document.getElementById("plex").appendChild(alert);
 		}
 
 		subtitles.hideAlert = setTimeout(function() {
 			document.getElementById("transmogrify-subtitle-alert").setAttribute("class", "alert alert-status transition-out");
 		}, 2000);
-
-		var ss = document.createElement('script');
-		ss.textContent = 'TransmogrifySubs.subsSync(' + sec + ')';
-		document.head.appendChild(ss);
-		ss.parentNode.removeChild(ss);
 	}
 }

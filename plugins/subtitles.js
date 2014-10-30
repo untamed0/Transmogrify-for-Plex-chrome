@@ -2,6 +2,7 @@ subtitles = {
 	metadata_xml: null,
 	sync: 0,
 	hideAlert: null,
+	jsInsert: false,
 
 	init: function(metadata_xml, page) {
 		subtitles.metadata_xml = metadata_xml;
@@ -97,6 +98,8 @@ subtitles = {
 	},
 
 	play: function(subs, lang) {
+		if (subtitles.jsInsert)
+			return;
 /*
 	For future use when browsers add support for subtitles
 
@@ -108,6 +111,7 @@ subtitles = {
 		document.getElementById("html-video").appendChild(track);
 */
 		// insert bubblesjs
+
 		var bubblesScript = document.createElement("script");
 		bubblesScript.src = chrome.extension.getURL("resources/subtitles/bubbles.js");
 		document.head.appendChild(bubblesScript);
@@ -126,6 +130,7 @@ subtitles = {
 			document.head.appendChild(s2);
 		}, 500);
 
+		subtitles.jsInsert = true;
 		subtitles.hotkeysInit();
 	},
 

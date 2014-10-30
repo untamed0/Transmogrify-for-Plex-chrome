@@ -1,11 +1,17 @@
 .subtitles {
 	position: absolute;
-	bottom: 5%;
+	bottom: 15%;
 	right: 0;
 	left: 0;
 	text-align: center;
 	margin-left: auto;
 	margin-right: auto;
+	font-family: Calibri,Candara,Segoe,Segoe UI,Optima,Arial,sans-serif;
+	font-size: 36px;
+	line-height: 1.2em;
+	font-weight: bold;
+	-webkit-text-stroke: 2px rgba(0, 0, 0, 0.6);
+	text-shadow: 1px 0px 2px rgba(0, 0, 0, 1);
 }
 #transmogrify-subtitle-alert {
 	z-index: 9999;

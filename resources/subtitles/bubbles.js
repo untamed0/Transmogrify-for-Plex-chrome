@@ -408,6 +408,7 @@ function videoBubbles() {
 		 * otherwise hidden
 		 *********************************/
 		this.subsShow = function( bool ) {
+			var subContStyle = bubbles.subs[ this.id ].subCont.style;
 			if( bool )
 				subContStyle.display = "block";
 			else

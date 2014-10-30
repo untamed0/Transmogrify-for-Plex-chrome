@@ -9,7 +9,7 @@ subtitles = {
 
 	fetchSubs: function() {
 		var subFormats = [ 'srt' ]; // just srt for now, maybe convert .sub etc to .srt?
-		var subsFound = [];
+		var subsFound = {};
 		var subs = subtitles.metadata_xml.getElementsByTagName("MediaContainer")[0].getElementsByTagName("Video")[0].getElementsByTagName("Media")[0].getElementsByTagName("Part")[0].getElementsByTagName("Stream");
 
 		for (var i = 0; i < subs.length; i++) {
@@ -35,7 +35,15 @@ subtitles = {
 				code = '';
 			}
 
-			subsFound.push({ "lang" : lang , "code" : code , "type" : codec , "path" : key });
+			// number any duplicates with 2,3,4 etc
+			var langKey = lang;
+			var num = 2;
+			while (subsFound[langKey]) {
+				langKey = lang + " " + num; 
+				num++;
+			}
+
+			subsFound[langKey] = { "language" : lang , "file" : key + '?X-Plex-Token=' + global_plex_token };
 		}
 
 		if (subsFound.length === 0) {
@@ -44,24 +52,49 @@ subtitles = {
 		}
 
 // ----------- start test code
-		var isPlaying = setInterval(function() {
+//		subtitles.insertSubSelectPage(subsFound);
 
+		var isPlaying = setInterval(function() {
 			if (document.getElementById("html-video")) {
 				clearInterval(isPlaying);
-				subtitles.play(subsFound[0].path, subsFound[0].code, subsFound[0].lang);
+				subtitles.insertSubSelectPlayer(subsFound);
+				subtitles.play(subsFound);
 			}
-		
 		}, 500);
 // ----------- end test code
 
 		return subsFound;
 	},
 
-	insertSelection: function() {
-		//insert html
+	insertSubSelectPage: function(subs) {
+		var selector = document.getElementById('subtitles-dropdown').getElementsByClassName('dropdown-menu')[0];
+		if (selector) {
+			for (var key in subs) {
+				var sub = subs[key];
+				var li = document.createElement("li");
+				li.innerHTML = '<a onclick="event.preventDefault();transmogrifySubChange(\'' + sub.language + '\')" data-id="0" href="#">' + sub.language + ' (No Transcode)</a>';
+				selector.insertBefore(li, selector.getElementsByTagName('li')[1]);
+			}
+		}
 	},
 
-	play: function(src, code, lang) {
+	insertSubSelectPlayer: function(subs) {
+		var controlsTimer = setInterval(function() {
+			var selector = document.getElementById('subtitles-dropdown-list').getElementsByClassName('dropdown-menu')[0];
+			if (selector && !document.getElementsByClassName('modal-backdrop')[0]) {
+				clearInterval(controlsTimer);
+				for (var key in subs) {
+					var sub = subs[key];
+					var li = document.createElement("li");
+					li.innerHTML = '<a onclick="transmogrifySubChange(\'' + sub.language + '\');" data-id="0" href="#">' + sub.language + ' (No Transcode) <i class="player-dropdown-selected-icon dropdown-selected-icon glyphicon ok-2"></i></a>';
+					selector.insertBefore(li, selector.getElementsByTagName('li')[1]);
+				}
+				selector.getElementsByTagName('li')[0].getElementsByTagName('a')[0].setAttribute("onclick", "transmogrifySubChange(false);");
+			}
+		}, 500);
+	},
+
+	play: function(subs, lang) {
 /*
 	For future use when browsers add support for subtitles
 
@@ -81,9 +114,15 @@ subtitles = {
 		// have to use setTimeout to allow bubblejs to execute
 		setTimeout(function() {
 			var s2 = document.createElement('script');
-			s2.textContent = 'new Bubbles.video("html-video", false, null, true).subtitles(false, { "' + lang + '" : { language : "' + lang + '", file : "' + src + '?X-Plex-Token=' + global_plex_token + '" } });';
+			s2.textContent = 'function transmogrifySubChange(lang){ if (!lang) { TransmogrifySubs.subsShow(false); } else { TransmogrifySubs.subsShow(true); TransmogrifySubs.langChange(lang); } } var TransmogrifySubs = new Bubbles.video("html-video", false, null, true);TransmogrifySubs.subtitles(false, ' + JSON.stringify(subs) + '); ';
+
+			if (!lang) {
+				s2.textContent += 'transmogrifySubChange(false);';
+			} else {
+				s2.textContent += 'transmogrifySubChange("' + lang + '");';
+			}
+
 			document.head.appendChild(s2);
-			s2.parentNode.removeChild(s2);
 		}, 500);
 	}
 }

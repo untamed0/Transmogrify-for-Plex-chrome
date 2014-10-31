@@ -21,3 +21,11 @@
 	bottom: 10%;
 	width: 300px;
 }
+.transmogrify-error {
+	left: 50% !important;
+	right: auto !important;
+	width: auto !important;
+}
+.transmogrify-error>.status {
+	height: auto !important;
+}

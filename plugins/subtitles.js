@@ -79,8 +79,9 @@ subtitles = {
 				for (var key in subs) {
 					var sub = subs[key];
 					var li = document.createElement("li");
-					li.innerHTML = '<a onclick="transmogrifySubChange(\'' + sub.language + '\');" data-id="0" href="#">' + sub.language + ' (No Transcode) <i class="player-dropdown-selected-icon dropdown-selected-icon glyphicon ok-2"></i></a>';
+					li.innerHTML = '<a class="transmogrifySub" onclick="transmogrifySubChange(\'' + sub.language + '\');" data-id="0" href="#">' + sub.language + ' (No Transcode) <i class="player-dropdown-selected-icon dropdown-selected-icon glyphicon ok-2"></i></a>';
 					selector.insertBefore(li, selector.getElementsByTagName('li')[1]);
+					li.getElementsByTagName('a')[0].addEventListener('click', subtitles.checkSubs, false);
 				}
 				// selecting 'none' disables the subtitles
 				selector.getElementsByTagName('li')[0].getElementsByTagName('a')[0].setAttribute("onclick", "transmogrifySubChange(false);");
@@ -169,7 +170,22 @@ subtitles = {
 		ss.parentNode.removeChild(ss);
 	},
 
-	alert: function(text, timeout) {
+	checkSubs: function() {
+		setTimeout(function() {
+			var selector = document.getElementById("html-video");
+			if (selector && selector.getAttribute("src").indexOf("/transcode/") > -1) {
+				subtitles.alert("It looks like this video is being transcoded. Transmogrify subtitles<br>do not work on transcoded video due to the way Plex functions.", 10, true);
+
+				var s = document.createElement("script");
+				// click 'none'
+				s.textContent = "transmogrifySubChange(false);document.getElementById('subtitles-dropdown-list').getElementsByClassName('dropdown-menu')[0].getElementsByTagName('li')[0].getElementsByTagName('a')[0].click();";
+				document.head.appendChild(s);
+				s.parentNode.removeChild(s);
+			}
+		}, 500);
+	},
+
+	alert: function(text, timeout, error) {
 		var selector = document.getElementById("transmogrify-subtitle-alert");
 
 		if (selector) {
@@ -177,13 +193,13 @@ subtitles = {
 			clearTimeout(subtitles.hideAlert);
 
 			selector.style.display = 'none';
-			selector.setAttribute("class", "alert alert-status"); //remove transition-out class
-			selector.getElementsByClassName('status')[0].innerText = text;
+			selector.setAttribute("class", "alert alert-status" + ((error) ? " transmogrify-error" : "")); //remove transition-out class, add error class if (error)
+			selector.getElementsByClassName('status')[0].innerHTML = text;
 			selector.style.display = 'block';
 		} else {
 			var alert = document.createElement("div");
 			alert.setAttribute("id", "transmogrify-subtitle-alert");
-			alert.setAttribute("class", "alert alert-status"); //remove transition-out class
+			alert.setAttribute("class", "alert alert-status" + ((error) ? " transmogrify-error" : "")); //remove transition-out class, add error class if (error)
 			alert.innerHTML = '<i class="alert-icon glyphicon stopwatch"></i><span class="status">' + text + '</span>';
 			document.getElementById("plex").appendChild(alert);
 		}

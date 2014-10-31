@@ -11,7 +11,7 @@ subtitles = {
 	},
 
 	fetchSubs: function() {
-		var subFormats = [ 'srt' ]; // just srt for now, maybe convert .sub etc to .srt?
+		var subFormats = [ "srt" ]; // just srt for now, maybe convert .sub etc to .srt?
 		var subsFound = {};
 		var subs = subtitles.metadata_xml.getElementsByTagName("MediaContainer")[0].getElementsByTagName("Video")[0].getElementsByTagName("Media")[0].getElementsByTagName("Part")[0].getElementsByTagName("Stream");
 
@@ -35,8 +35,8 @@ subtitles = {
 			var code = subs[i].getAttribute("languageCode");
 
 			if (!lang) {
-				lang = 'Unknown';
-				code = '';
+				lang = "Unknown";
+				code = "";
 			}
 
 			// number any duplicates with 2,3,4 etc
@@ -48,7 +48,8 @@ subtitles = {
 			}
 
 			// required format for bubblesjs, languageCode is currently unused but may be needed in future
-			subsFound[langKey] = { "language" : lang , "file" : key + '?X-Plex-Token=' + global_plex_token };
+			subsFound[langKey] = { "language" : lang , "file" : key + "?X-Plex-Token=" + global_plex_token };
+			utils.debug("subtitles plugin: Found " + lang + " (" + code + ") subtitles");
 		}
 
 		if (subsFound.length === 0) {
@@ -72,19 +73,19 @@ subtitles = {
 	insertSubSelectPlayer: function(subs) {
 		// wait for the subtitle icon to appear
 		var controlsTimer = setInterval(function() {
-			var selector = document.getElementById('subtitles-dropdown-list');
-			if (selector && selector.getElementsByClassName('dropdown-menu')[0] && !document.getElementsByClassName('modal-backdrop')[0]) {
-				selector = selector.getElementsByClassName('dropdown-menu')[0];
+			var selector = document.getElementById("subtitles-dropdown-list");
+			if (selector && selector.getElementsByClassName("dropdown-menu")[0] && !document.getElementsByClassName("modal-backdrop")[0]) {
+				selector = selector.getElementsByClassName("dropdown-menu")[0];
 				clearInterval(controlsTimer);
 				for (var key in subs) {
 					var sub = subs[key];
 					var li = document.createElement("li");
 					li.innerHTML = '<a class="transmogrifySub" onclick="transmogrifySubChange(\'' + sub.language + '\');" data-id="0" href="#">' + sub.language + ' (No Transcode) <i class="player-dropdown-selected-icon dropdown-selected-icon glyphicon ok-2"></i></a>';
-					selector.insertBefore(li, selector.getElementsByTagName('li')[1]);
-					li.getElementsByTagName('a')[0].addEventListener('click', subtitles.checkSubs, false);
+					selector.insertBefore(li, selector.getElementsByTagName("li")[1]);
+					li.getElementsByTagName("a")[0].addEventListener("click", subtitles.checkSubs, false);
 				}
 				// selecting 'none' disables the subtitles
-				selector.getElementsByTagName('li')[0].getElementsByTagName('a')[0].setAttribute("onclick", "transmogrifySubChange(false);");
+				selector.getElementsByTagName("li")[0].getElementsByTagName("a")[0].setAttribute("onclick", "transmogrifySubChange(false);");
 			}
 		}, 500);
 	},
@@ -107,27 +108,32 @@ subtitles = {
 			document.head.appendChild(bubblesScript);
 
 			subtitles.jsInsert = true;
+			utils.debug("subtitles plugin: Bubblesjs script inserted");
+		} else {
+			utils.debug("subtitles plugin: Bubblesjs has already been inserted");
 		}
 
 		// make sure old code is removed
 		var selector = document.getElementById("transmogrify-script");
 		if (selector) {
 			selector.parentNode.removeChild(selector);
+			utils.debug("subtitles plugin: Removed old script");
 		}
 
 		// have to use setTimeout to allow bubblesjs to execute
 		setTimeout(function() {
-			var s2 = document.createElement('script');
+			var s2 = document.createElement("script");
 			s2.setAttribute("id", "transmogrify-script");
 			s2.textContent = 'function transmogrifySubChange(lang){ if (!lang) { TransmogrifySubs.subsShow(false); } else { TransmogrifySubs.subsShow(true); TransmogrifySubs.langChange(lang); } } var TransmogrifySubs = new Bubbles.video("html-video", false, null, true);TransmogrifySubs.subtitles(false, ' + JSON.stringify(subs) + '); ';
 
 			if (!lang) { // if no subtitle was selected
-				s2.textContent += 'transmogrifySubChange(false);';
+				s2.textContent += "transmogrifySubChange(false);";
 			} else {
-				s2.textContent += 'transmogrifySubChange("' + lang + '");';
+				s2.textContent += "transmogrifySubChange('" + lang + "');";
 			}
 
 			document.head.appendChild(s2);
+			utils.debug("subtitles plugin: Inserted script");
 		}, 500);
 
 		subtitles.hotkeysInit();
@@ -137,33 +143,33 @@ subtitles = {
 		document.onkeydown = function(e) {
 			if (e.which == 71) { // g
 				utils.debug("subtitles plugin: G hotkey pressed, decreasing subtitle timing");
-				subtitles.hotkeys('subtract');
+				subtitles.hotkeys("subtract");
 			} else if (e.which == 72) { // h
 				utils.debug("subtitles plugin: H hotkey pressed, increasing subtitle timing");
-				subtitles.hotkeys('add');
+				subtitles.hotkeys("add");
 			} else if (e.which == 86) { // v
 				utils.debug("subtitles plugin: V hotkey pressed, toggling subtitles");
-				subtitles.hotkeys('toggle');
+				subtitles.hotkeys("toggle");
 			}
 		}
 	},
 
 	hotkeys: function(act) {
-		var ss = document.createElement('script');
+		var ss = document.createElement("script");
 
-		if (act == 'toggle') {
-			subtitles.alert('Toggling subtitles');
-			ss.textContent = 'TransmogrifySubs.subsToggle()';
+		if (act == "toggle") {
+			subtitles.alert("Toggling subtitles");
+			ss.textContent = "TransmogrifySubs.subsToggle();";
 		} else {
 			if (act == "add") {
 				subtitles.sync++;
-			} else if (act == 'subtract') {
+			} else if (act == "subtract") {
 				subtitles.sync--;
 			}
 
 			var sec = 0.05 * subtitles.sync;
-			ss.textContent = 'TransmogrifySubs.subsSync(' + sec + ')';
-			subtitles.alert('Subtitle delay ' + Math.round(sec * 1000) + 'ms');
+			ss.textContent = "TransmogrifySubs.subsSync(" + sec + ");";
+			subtitles.alert("Subtitle delay " + Math.round(sec * 1000) + "ms");
 		}
 
 		document.head.appendChild(ss);
@@ -175,6 +181,7 @@ subtitles = {
 			var selector = document.getElementById("html-video");
 			if (selector && selector.getAttribute("src").indexOf("/transcode/") > -1) {
 				subtitles.alert("It looks like this video is being transcoded. Transmogrify subtitles<br>do not work on transcoded video due to the way Plex functions.", 10, true);
+				utils.debug("subtitles plugin: Video is transcoded, disabling Transmogrify subtitles");
 
 				var s = document.createElement("script");
 				// click 'none'
@@ -192,10 +199,10 @@ subtitles = {
 			// prevent animations stacking
 			clearTimeout(subtitles.hideAlert);
 
-			selector.style.display = 'none';
+			selector.style.display = "none";
 			selector.setAttribute("class", "alert alert-status" + ((error) ? " transmogrify-error" : "")); //remove transition-out class, add error class if (error)
-			selector.getElementsByClassName('status')[0].innerHTML = text;
-			selector.style.display = 'block';
+			selector.getElementsByClassName("status")[0].innerHTML = text;
+			selector.style.display = "block";
 		} else {
 			var alert = document.createElement("div");
 			alert.setAttribute("id", "transmogrify-subtitle-alert");

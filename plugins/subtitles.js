@@ -83,8 +83,9 @@ subtitles = {
 
 	insertSubSelectPlayer: function(subs) {
 		var controlsTimer = setInterval(function() {
-			var selector = document.getElementById('subtitles-dropdown-list').getElementsByClassName('dropdown-menu')[0];
-			if (selector && !document.getElementsByClassName('modal-backdrop')[0]) {
+			var selector = document.getElementById('subtitles-dropdown-list');
+			if (selector && selector.getElementsByClassName('dropdown-menu')[0] && !document.getElementsByClassName('modal-backdrop')[0]) {
+				selector = selector.getElementsByClassName('dropdown-menu')[0];
 				clearInterval(controlsTimer);
 				for (var key in subs) {
 					var sub = subs[key];

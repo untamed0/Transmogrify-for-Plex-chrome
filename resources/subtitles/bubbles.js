@@ -293,7 +293,7 @@ function videoBubbles() {
 				}
 			}
 			//setTimeout( bubbles.timeout, 340 ); //calls itself - not using set Timeout anymore because of a horrible Firefox 6 bug
-		},	340);
+		},	100);
 		
 		//bubbles.timeout(); -- same as above - it seemed that firefox 6 was misbehaving with setTimeout so it was dropped alltogether, despite it being the most "logic"-safe method
 		
@@ -541,7 +541,7 @@ function videoBubbles() {
 			{
 				var string = fileLines[ i ].replace( /^\s+|\s+$/g, "" );
 
-				if( !isNaN( string ) &&  parseInt( fileLines[ i ] ) === ( old_int + 1 ) )
+				if( !isNaN( string ) &&  parseInt( fileLines[ i ] ) >= ( old_int + 1 ) )
 				{
 					++j;
 					
@@ -663,7 +663,7 @@ Bubbles.effects['slide'] = function( object, data, mode ) {
 			objStyle.display = "none";
 			objStyle.top = data.position[ 0 ];
 			object.className = data.className;
-		}, 340);
+		}, 100);
 		
 		objStyle.top = "1248px";
 	}	
@@ -689,7 +689,7 @@ Bubbles.effects['fade'] = function( object, data, mode ) {
 		setTimeout( function() {
 			objStyle.display = "none";
 			object.className = data.className;
-		},340);
+		},100);
 		
 		object.className = data.className + ' fadeOut';
 	}	

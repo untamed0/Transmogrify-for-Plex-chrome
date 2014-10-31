@@ -1,3 +1,4 @@
+// Copyright 2014 sam0/untamed0 - https://github.com/untamed0 . Licensed under GPLv3
 subtitles = {
 	metadata_xml: null,
 	sync: 0,
@@ -28,7 +29,12 @@ subtitles = {
 
 			// no key attribute means sub is within a media container
 			if (!key) {
-				return;
+				continue;
+			}
+
+			// seems to be a bug with plex listing multiple srt streams for 1 file?
+			if (!subs[i].getAttribute("format")) {
+				continue;
 			}
 
 			var lang = subs[i].getAttribute("language");
@@ -49,7 +55,7 @@ subtitles = {
 
 			// required format for bubblesjs, languageCode is currently unused but may be needed in future
 			subsFound[langKey] = { "language" : lang , "file" : key + "?X-Plex-Token=" + global_plex_token };
-			utils.debug("subtitles plugin: Found " + lang + " (" + code + ") subtitles");
+			utils.debug("subtitles plugin: Found " + lang + " subtitles");
 		}
 
 		if (subsFound.length === 0) {
@@ -83,9 +89,11 @@ subtitles = {
 					li.innerHTML = '<a class="transmogrifySub" onclick="transmogrifySubChange(\'' + sub.language + '\');" data-id="0" href="#">' + sub.language + ' (No Transcode) <i class="player-dropdown-selected-icon dropdown-selected-icon glyphicon ok-2"></i></a>';
 					selector.insertBefore(li, selector.getElementsByTagName("li")[1]);
 					li.getElementsByTagName("a")[0].addEventListener("click", subtitles.checkSubs, false);
+					utils.debug("subtitles plugin: Inserted " + sub.language + " into subtitle selection");
 				}
 				// selecting 'none' disables the subtitles
 				selector.getElementsByTagName("li")[0].getElementsByTagName("a")[0].setAttribute("onclick", "transmogrifySubChange(false);");
+				utils.debug("subtitles plugin: Finished inserting subtitle selection");
 			}
 		}, 500);
 	},
@@ -180,7 +188,7 @@ subtitles = {
 		setTimeout(function() {
 			var selector = document.getElementById("html-video");
 			if (selector && selector.getAttribute("src").indexOf("/transcode/") > -1) {
-				subtitles.alert("It looks like this video is being transcoded. Transmogrify subtitles<br>do not work on transcoded video due to the way Plex functions.", 10, true);
+				subtitles.alert("It looks like this video is being transcoded. Transmogrify subtitles<br>do not work with transcoded videoes due to the way Plex functions", 10, true);
 				utils.debug("subtitles plugin: Video is transcoded, disabling Transmogrify subtitles");
 
 				var s = document.createElement("script");

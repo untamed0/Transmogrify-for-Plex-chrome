@@ -513,75 +513,75 @@ function main() {
             });
         }
 
-		// subtitles
-		if (settings["subtitles"] === "on") {
-			utils.debug("subtitles plugin is enabled");
+        // subtitles
+        if (settings["subtitles"] === "on") {
+            utils.debug("subtitles plugin is enabled");
 
-			// check if video player is active
-			var observer = new MutationObserver(function(mutations) {
-				mutations.forEach(function(mutation) {
-					var check = mutation.addedNodes[0];
+            // check if video player is active
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    var check = mutation.addedNodes[0];
 
-					if (check && check.classList && check.classList.contains("video-player")) {
-						utils.debug("video player detected");
+                    if (check && check.classList && check.classList.contains("video-player")) {
+                        utils.debug("video player detected");
 
-						// hook all ajax requests, if we're not already
-						if (!document.getElementById("xhr-hook-script")) {
-							var s = document.createElement("script");
-							s.setAttribute("id", "xhr-hook-script");
-							s.textContent = "$(document).ajaxSuccess( function(event, xhr, settings){" +
-												// unfortunately, we can't get the xhr url, only the response, so these ifs narrow down the xml request to /library/metadata/<mediaid>
-												"var xml = $($.parseXML(xhr.responseText));" +
-												"var sel = xml.find('MediaContainer');" +
-												"if (!sel || !sel.attr('mediaTagVersion')) { return; }" +
-												"sel2 = sel.find('Video');" +
-												"if (!sel2.attr('playQueueItemID') && sel2.find('Media').find('Part').attr('accessible')) {" +
-													// allow the mediaid to be accessed by the extension
-													"$('body').attr('data-transmogrify-mediaid', sel2.attr('ratingKey'));" +
-												"}" +
-											"});";
-							document.head.appendChild(s);
+                        // hook all ajax requests, if we're not already
+                        if (!document.getElementById("xhr-hook-script")) {
+                            var s = document.createElement("script");
+                            s.setAttribute("id", "xhr-hook-script");
+                            s.textContent = "$(document).ajaxSuccess( function(event, xhr, settings){" +
+                                                // unfortunately, we can't get the xhr url, only the response, so these ifs narrow down the xml request to /library/metadata/<mediaid>
+                                                "var xml = $($.parseXML(xhr.responseText));" +
+                                                "var sel = xml.find('MediaContainer');" +
+                                                "if (!sel || !sel.attr('mediaTagVersion')) { return; }" +
+                                                "sel2 = sel.find('Video');" +
+                                                "if (!sel2.attr('playQueueItemID') && sel2.find('Media').find('Part').attr('accessible')) {" +
+                                                    // allow the mediaid to be accessed by the extension
+                                                    "$('body').attr('data-transmogrify-mediaid', sel2.attr('ratingKey'));" +
+                                                "}" +
+                                            "});";
+                            document.head.appendChild(s);
 
-							utils.debug("inserted xhr hook");
-						}
+                            utils.debug("inserted xhr hook");
+                        }
 
-						// video src is empty while resume modal/dialog is active
-						var isPlaying = setInterval(function() {
-							var selector = document.getElementById("html-video").getAttribute("src");
+                        // video src is empty while resume modal/dialog is active
+                        var isPlaying = setInterval(function() {
+                            var selector = document.getElementById("html-video").getAttribute("src");
 
-							if (selector) {
-								clearInterval(isPlaying);
+                            if (selector) {
+                                clearInterval(isPlaying);
 
-								// get server ip and port
-								var src_server = selector.match(/\/\/(.*?):(\d+)\//);
+                                // get server ip and port
+                                var src_server = selector.match(/\/\/(.*?):(\d+)\//);
 
-								// wait for ajax hook to get media id
-								var getMediaID = setInterval(function() {
-									var media_id = document.body.getAttribute("data-transmogrify-mediaid");
-									if (media_id) {
-										clearInterval(getMediaID);
-										document.body.setAttribute("data-transmogrify-mediaid", "");
-										var metadata_xml_url = "http://" + src_server[1] + ":" + src_server[2] + "/library/metadata/" + media_id + "?X-Plex-Token=" + global_plex_token;
+                                // wait for ajax hook to get media id
+                                var getMediaID = setInterval(function() {
+                                    var media_id = document.body.getAttribute("data-transmogrify-mediaid");
+                                    if (media_id) {
+                                        clearInterval(getMediaID);
+                                        document.body.setAttribute("data-transmogrify-mediaid", "");
+                                        var metadata_xml_url = "http://" + src_server[1] + ":" + src_server[2] + "/library/metadata/" + media_id + "?X-Plex-Token=" + global_plex_token;
 
-										// fetch metadata xml asynchronously
-										utils.getXML(metadata_xml_url, function(metadata_xml) {
-											// check again that subtitles are enabled
-											if (settings["subtitles"] === "on") {
-												subtitles.init(metadata_xml);
-											}
-										});
-									}
-								}, 500);
-							}
-						}, 500);
-					}
-				});
-			});
-			observer.observe(document.getElementById("plex"), { "childList": true, "subtree": true });
-		}
-		else {
-			utils.debug("subtitles plugin is disabled");
-		}
+                                        // fetch metadata xml asynchronously
+                                        utils.getXML(metadata_xml_url, function(metadata_xml) {
+                                            // check again that subtitles are enabled
+                                            if (settings["subtitles"] === "on") {
+                                                subtitles.init(metadata_xml);
+                                            }
+                                        });
+                                    }
+                                }, 500);
+                            }
+                        }, 500);
+                    }
+                });
+            });
+            observer.observe(document.getElementById("plex"), { "childList": true, "subtree": true });
+        }
+        else {
+            utils.debug("subtitles plugin is disabled");
+        }
     });
 }
 

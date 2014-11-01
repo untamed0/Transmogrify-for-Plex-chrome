@@ -8,7 +8,9 @@ subtitles = {
 	init: function(metadata_xml, page) {
 		subtitles.metadata_xml = metadata_xml;
 
-		subtitles.fetchSubs();
+		var subs = subtitles.fetchSubs();
+		subtitles.insertSubSelectPlayer(subs);
+		subtitles.play(subs);
 	},
 
 	fetchSubs: function() {
@@ -62,16 +64,6 @@ subtitles = {
 			utils.debug("subtitles plugin: No suitable subtitles found");
 			return false;
 		}
-
-// ----------- start test code
-		var isPlaying = setInterval(function() {
-			if (document.getElementById("html-video")) {
-				clearInterval(isPlaying);
-				subtitles.insertSubSelectPlayer(subsFound);
-				subtitles.play(subsFound);
-			}
-		}, 500);
-// ----------- end test code
 
 		return subsFound;
 	},
